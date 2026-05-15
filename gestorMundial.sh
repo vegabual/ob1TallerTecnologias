@@ -4,6 +4,7 @@
 
 archivo=basegestor.txt
 cantPartidosSesion=0
+equipos=()
 
 #colores para impresion en pantalla
 rojo="\u001B[0;31m"
@@ -23,6 +24,7 @@ comienzoScript(){
   if [ ! -e $archivo ]; then
     cargaInicialDatos
   fi
+  obtenerEquipos
   menu
 }
 
@@ -60,7 +62,7 @@ menu(){
         echo "registrarEquipo"
       ;;
       4)
-        echo "registrarPartido"
+        registrarPartido
       ;;
       5)
         echo "verHistorial"
@@ -69,7 +71,7 @@ menu(){
         echo "buscarPartido"
       ;;
       7)
-        echo "cantidadPartidos"
+        cantidadPartidos
       ;;
       0)
         imprimirColor "Gracias por jugar"
@@ -83,11 +85,45 @@ menu(){
 
 #funcionalidades
 mostrarCampeonMundial(){
-	campeon=$(grep 'campeon-' $archivo | cut -d '-' -f2)
-	imprimirExito "El campeon actual es $campeon"
+  campeon=$(grep 'campeon-' $archivo | cut -d '-' -f2)
+  imprimirExito "El campeon actual es $campeon"
 }
 
-#metodos auxiliares para pedir datos
+registrarPartido(){
+  local equipo1
+  local equipo2
+  local goles1
+  local goles2
+  
+  equipo1=$(pedirEquipo)
+  equipo1=$(($equipo1 - 1))
+  equipo2=$(pedirEquipo)
+  equipo2=$(($equipo2 - 1))
+  
+  while [ $equipo1 -eq $equipo2 ]; do
+    imprimirError "Se ingreso el mismo equipo de contrincante, vuelva a seleccionar un equipo"
+    equipo2=$(pedirEquipo)
+    equipo2=$(($equipo2 - 1))
+  done
+  
+  goles1=$(leerNumero "Ingrese los goles realizaodos por ${equipos[$equipo1]}")
+  goles2=$(leerNumero "Ingrese los goles realizaodos por ${equipos[$equipo2]}")
+  
+  echo "partido-${equipos[$equipo1]} $goles1 ${equipos[$equipo2]} $goles2" >> $archivo
+  cantPartidosSesion=$(($cantPartidosSesion+1))
+  imprimirExito "Se registro correctamente el partido"
+}
+
+cantidadPartidos(){
+  imprimirExito "Se jugaron $cantPartidosSesion partidos en esta sesion"
+}
+
+#Metodos auxiliares
+obtenerEquipos(){
+  mapfile -t equipos < <(awk -F '-' '$1 == "equipo" { print $2 }' "$archivo")
+}
+
+#Metodos auxiliares para pedir datos
 leerStringNoVacio(){
   local pedido="$1"
   local input
@@ -113,6 +149,39 @@ leerNumero(){
   done
 
   echo "$num"
+}
+
+leerEquipo(){
+  local pedido="$1"
+  local eq
+
+  eq=$(leerNumero "$pedido")
+  
+  while [[ ! ( $eq -gt 0 && $eq -le ${#equipos[@]} ) ]]; do
+    imprimirError "No es un equipo valido, intenta de nuevo"
+    eq=$(leerNumero "$pedido")
+  done
+
+  echo "$eq"
+}
+
+pedirEquipo(){
+  local equipo
+  
+  listarEquipos
+  
+  equipo=$(leerEquipo "Elegir equipo")
+  
+  echo "$equipo"
+}
+
+#Metodos auxiliares para impresion en pantalla
+listarEquipos(){
+  indice=1
+  for e in "${equipos[@]}"; do
+    echo "$indice - $e" >&2
+	indice=$(($indice + 1))
+  done
 }
 
 #Metodos auxiliares para imprimir a color
