@@ -26,6 +26,7 @@ comienzoScript(){
   menu
 }
 
+#Carga los datos iniciales al archivo
 cargaInicialDatos(){
   echo campeon-Argentina >> $archivo
   echo equipo-Uruguay >> $archivo
@@ -36,8 +37,7 @@ cargaInicialDatos(){
 
 menu(){
   local opcion=-1
-  while [ "$opcion" -ne 0 ]
-  do
+  while [ "$opcion" -ne 0 ]; do
     echo "1 - Listar equipos"
     echo "2 - Mostrar campeon mundial"
     echo "3 - Registrar equipo"
@@ -54,7 +54,7 @@ menu(){
         echo "listarEquipos"
       ;;
       2)
-        echo "mostrarCampeonMundial"
+        mostrarCampeonMundial
       ;;
       3)
         echo "registrarEquipo"
@@ -81,6 +81,13 @@ menu(){
   done
 }
 
+#funcionalidades
+mostrarCampeonMundial(){
+	campeon=$(grep 'campeon-' $archivo | cut -d '-' -f2)
+	imprimirExito "El campeon actual es $campeon"
+}
+
+#metodos auxiliares para pedir datos
 leerStringNoVacio(){
   local pedido="$1"
   local input
@@ -108,6 +115,7 @@ leerNumero(){
   echo "$num"
 }
 
+#Metodos auxiliares para imprimir a color
 imprimirError(){
   local texto="$1"
   echo -e "${rojo}$texto${reset}" >&2
@@ -127,4 +135,6 @@ imprimirColor(){
   local texto="$1"
   echo -e "${celeste}$texto${reset}" >&2
 }
+
+#Comienzo del programa
 comienzoScript
