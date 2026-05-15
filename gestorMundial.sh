@@ -5,6 +5,7 @@
 archivo=basegestor.txt
 cantPartidosSesion=0
 equipos=()
+partidos=()
 
 #colores para impresion en pantalla
 rojo="\u001B[0;31m"
@@ -24,7 +25,8 @@ comienzoScript(){
   if [ ! -e $archivo ]; then
     cargaInicialDatos
   fi
-  obtenerEquipos
+  obtenerEquiposDeArchivo
+  obtenerPartidosDeArchivo
   menu
 }
 
@@ -35,6 +37,7 @@ cargaInicialDatos(){
   echo equipo-Argentina >> $archivo
   echo equipo-Brasil >> $archivo
   echo partido-Uruguay 2 Brasil 0 >> $archivo
+  echo partido-Argentina 1 Brasil 3 >> $archivo
 }
 
 menu(){
@@ -100,28 +103,33 @@ mostrarCampeonMundial(){
 }
 
 registrarPartido(){
-  local equipo1
-  local equipo2
-  local goles1
-  local goles2
+  if [ ${#equipos[@]} -ge 2 ]; then 
+    local equipo1
+    local equipo2
+    local goles1
+    local goles2
   
-  equipo1=$(pedirEquipo)
-  equipo1=$(($equipo1 - 1))
-  equipo2=$(pedirEquipo)
-  equipo2=$(($equipo2 - 1))
-  
-  while [ $equipo1 -eq $equipo2 ]; do
-    imprimirError "Se ingreso el mismo equipo de contrincante, vuelva a seleccionar un equipo"
+    equipo1=$(pedirEquipo)
+    equipo1=$(($equipo1 - 1))
     equipo2=$(pedirEquipo)
     equipo2=$(($equipo2 - 1))
-  done
   
-  goles1=$(leerNumero "Ingrese los goles realizaodos por ${equipos[$equipo1]}")
-  goles2=$(leerNumero "Ingrese los goles realizaodos por ${equipos[$equipo2]}")
+    while [ "$equipo1" -eq "$equipo2" ]; do
+      imprimirError "Se ingreso el mismo equipo de contrincante, vuelva a seleccionar un equipo"
+      equipo2=$(pedirEquipo)
+      equipo2=$(($equipo2 - 1))
+    done
   
-  echo "partido-${equipos[$equipo1]} $goles1 ${equipos[$equipo2]} $goles2" >> $archivo
-  cantPartidosSesion=$(($cantPartidosSesion+1))
-  imprimirExito "Se registro correctamente el partido"
+    goles1=$(leerNumero "Ingrese los goles realizaodos por ${equipos[$equipo1]}")
+    goles2=$(leerNumero "Ingrese los goles realizaodos por ${equipos[$equipo2]}")
+  
+    echo "partido-${equipos[$equipo1]} $goles1 ${equipos[$equipo2]} $goles2" >> $archivo
+    cantPartidosSesion=$(($cantPartidosSesion+1))
+    obtenerPartidosDeArchivo
+    imprimirExito "Se registro correctamente el partido"
+  else
+    imprimirError "Deben haber al menos 2 equipos registrados. Actualmente hay ${#equipos[@]}"
+  fi
 }
 
 cantidadPartidos(){
@@ -129,8 +137,12 @@ cantidadPartidos(){
 }
 
 #Metodos auxiliares
-obtenerEquipos(){
+obtenerEquiposDeArchivo(){
   mapfile -t equipos < <(awk -F '-' '$1 == "equipo" { print $2 }' "$archivo")
+}
+
+obtenerPartidosDeArchivo(){
+  mapfile -t partidos < <(awk -F '-' '$1 == "partido" { print $2 }' "$archivo")
 }
 
 #Metodos auxiliares para pedir datos
@@ -191,6 +203,12 @@ listarEquipos(){
   for e in "${equipos[@]}"; do
     echo "$indice - $e" >&2
 	indice=$(($indice + 1))
+  done
+}
+
+listarPartidos(){
+  for p in "${partidos[@]}"; do
+    echo "$p" >&2
   done
 }
 
