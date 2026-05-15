@@ -9,7 +9,7 @@ equipos=()
 #colores para impresion en pantalla
 rojo="\u001B[0;31m"
 amarillo="\033[0;31m"
-celeste="\033[1;36m"
+celeste="\033[0;36m"
 verde="\033[0;32m"
 reset="\033[0m"
 
