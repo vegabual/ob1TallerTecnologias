@@ -1,1 +1,130 @@
-#Obligatorio1 taller 
+#!/bin/bash
+
+#Comienzo Obligatorio1 taller 
+
+archivo=basegestor.txt
+cantPartidosSesion=0
+
+#colores para impresion en pantalla
+rojo="\u001B[0;31m"
+amarillo="\033[0;31m"
+celeste="\033[1;34m"
+verde="\033[0;32m"
+reset="\033[0m"
+
+comienzoScript(){
+  imprimirColor "********************************"
+  imprimirColor "* Bienvenido all obligatorio 1 *"
+  imprimirColor "*    Trabajo realizado por:    *"
+  imprimirColor "*   Gonzalo Ferrari - 288461   *"
+  imprimirColor "*  Veronica Busiello - 212712  *"
+  imprimirColor "********************************"
+
+  if [ ! -e $archivo ]; then
+    cargaInicialDatos
+  fi
+  menu
+}
+
+cargaInicialDatos(){
+  echo campeon-Argentina >> $archivo
+  echo equipo-Uruguay >> $archivo
+  echo equipo-Argentina >> $archivo
+  echo equipo-Brasil >> $archivo
+  echo partido-Uruguay 2 Brasil 0 >> $archivo
+}
+
+menu(){
+  local opcion=-1
+  while [ "$opcion" -ne 0 ]
+  do
+    echo "1 - Listar equipos"
+    echo "2 - Mostrar campeon mundial"
+    echo "3 - Registrar equipo"
+    echo "4 - Registrar partido"
+    echo "5 - Ver historial partidos"
+    echo "6 - Buscar equipo"
+    echo "7 - Cantidad de partidos jugados"
+    echo "0 - Salir"
+
+    opcion=$(leerNumero "Ingrese la opcion del menu")
+
+    case $opcion in
+      1)
+        echo "listarEquipos"
+      ;;
+      2)
+        echo "mostrarCampeonMundial"
+      ;;
+      3)
+        echo "registrarEquipo"
+      ;;
+      4)
+        echo "registrarPartido"
+      ;;
+      5)
+        echo "verHistorial"
+      ;;
+      6)
+        echo "buscarPartido"
+      ;;
+      7)
+        echo "cantidadPartidos"
+      ;;
+      0)
+        imprimirColor "Gracias por jugar"
+      ;;
+      *)
+        imprimirError "Opcion incorrecta"
+      ;;
+    esac
+  done
+}
+
+leerStringNoVacio(){
+  local pedido="$1"
+  local input
+
+  read -r -p "$pedido: " input
+  while [ -z "$input" ]; do
+    imprimirError "Está vacio, intentá de nuevo"
+    read -r -p "$pedido " input
+  done
+
+  echo "$input"
+}
+
+leerNumero(){
+  local pedido="$1"
+  local num
+
+  num=$(leerStringNoVacio "$pedido")
+
+  while [[ ! $num =~ ^[0-9]+$ ]]; do
+    imprimirError "No es un numero, intenta de nuevo"
+    num=$(leerStringNoVacio "$pedido")
+  done
+
+  echo "$num"
+}
+
+imprimirError(){
+  local texto="$1"
+  echo -e "${rojo}$texto${reset}" >&2
+}
+
+imprimirWarning(){
+  local texto="$1"
+  echo -e "${amarillo}$texto${reset}" >&2
+}
+
+imprimirExito(){
+  local texto="$1"
+  echo -e "${verde}$texto${reset}" >&2
+}
+
+imprimirColor(){
+  local texto="$1"
+  echo -e "${celeste}$texto${reset}" >&2
+}
+comienzoScript
