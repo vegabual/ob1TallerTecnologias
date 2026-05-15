@@ -8,7 +8,7 @@ equipos=()
 
 #colores para impresion en pantalla
 rojo="\u001B[0;31m"
-amarillo="\033[0;31m"
+amarillo="\033[0;33m"
 celeste="\033[0;36m"
 verde="\033[0;32m"
 reset="\033[0m"
@@ -40,6 +40,8 @@ cargaInicialDatos(){
 menu(){
   local opcion=-1
   while [ "$opcion" -ne 0 ]; do
+    imprimirColor "              MENU"
+    imprimirColor "--------------------------------"
     echo "1 - Listar equipos"
     echo "2 - Mostrar campeon mundial"
     echo "3 - Registrar equipo"
@@ -50,10 +52,11 @@ menu(){
     echo "0 - Salir"
 
     opcion=$(leerNumero "Ingrese la opcion del menu")
+    imprimirColor "--------------------------------"
 
     case $opcion in
       1)
-        echo "listarEquipos"
+        listarEquiposDisponibles
       ;;
       2)
         mostrarCampeonMundial
@@ -80,10 +83,17 @@ menu(){
         imprimirError "Opcion incorrecta"
       ;;
     esac
+    imprimirColor "--------------------------------"
   done
 }
 
 #funcionalidades
+
+listarEquiposDisponibles(){
+  echo "Equipos disponibles"
+  listarEquipos
+}
+
 mostrarCampeonMundial(){
   campeon=$(grep 'campeon-' $archivo | cut -d '-' -f2)
   imprimirExito "El campeon actual es $campeon"
